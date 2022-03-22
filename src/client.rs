@@ -3,15 +3,17 @@ use crate::Transaction;
 use rust_decimal::prelude::*;
 use rust_decimal_macros::dec;
 use serde::Deserialize;
+use serde::Serialize;
 use std::collections::BTreeMap;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Client {
     client_id: u16,
     available_amount: Decimal,
     held_amount: Decimal,
     total_amount: Decimal,
     locked: bool,
+    #[serde(skip_serializing)]
     transactions: BTreeMap<u32, Transaction>,
 }
 
