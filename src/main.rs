@@ -8,6 +8,9 @@ use thiserror::Error;
 
 use rust_decimal::prelude::*;
 
+mod transaction;
+use transaction::Transaction;
+
 #[derive(Debug, Deserialize, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 enum TransactionType {
