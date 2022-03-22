@@ -50,6 +50,15 @@ fn read_from_file(path: &str) -> Result<Vec<Token>, csv::Error> {
     Ok(reader.deserialize().flatten().collect())
 }
 
+fn write_to_stdout(clients: BTreeMap<u16, Client>) -> Result<(), csv::Error> {
+    let mut wtr = csv::Writer::from_writer(std::io::stdout());
+    for (_k, v) in clients {
+        wtr.serialize(v)?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
 #[derive(Debug, PartialEq, Error)]
 pub enum Error {
     /// There client that requested an operation has the account locked.
@@ -127,6 +136,9 @@ fn main() {
     if let Ok(tokens) = tokens_res {
         let mut clients = BTreeMap::<u16, Client>::new();
         clients = process_requests(tokens, clients);
+        if write_to_stdout(clients).is_err() {
+            exit(1);
+        }
     } else {
         exit(1);
     }
