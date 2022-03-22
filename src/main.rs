@@ -44,6 +44,19 @@ fn read_from_file(path: &str) -> Result<Vec<Token>, csv::Error> {
     Ok(reader.deserialize().flatten().collect())
 }
 
+#[derive(Debug, PartialEq, Error)]
+pub enum Error {
+    /// There client that requested an operation has the account locked.
+    #[error("The client number: {0} has the account locked. No operations are allowed.")]
+    LockedAccount(u16),
+    #[error("The client number: {0} does not have associated the transaction with number: {1}")]
+    TransactionDoesNotExist(u16, u32),
+    #[error("The client number: {0} does not have enough credit for the requested withdrawal.")]
+    NotEnoughCredit(u16),
+    #[error("The transaction number: {0} for client number: {1} is not disputed.")]
+    TransactionNotDisputed(u32, u16),
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
