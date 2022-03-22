@@ -12,6 +12,7 @@ mod transaction;
 use transaction::Transaction;
 
 mod client;
+use client::Client;
 
 #[derive(Debug, Deserialize, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
@@ -62,10 +63,71 @@ pub enum Error {
     TransactionNotDisputed(u32, u16),
 }
 
+fn process_requests(
+    tokens: Vec<Token>,
+    mut clients: BTreeMap<u16, Client>,
+) -> BTreeMap<u16, Client> {
+    for token in tokens {
+        match token.transaction_type {
+            TransactionType::Deposit => {
+                if let Some(amount) = token.amount {
+                    let client = clients
+                        .entry(token.client_id)
+                        .or_insert_with(|| Client::new(token.client_id));
+                    if client.deposit(token.transaction_id, amount).is_err() {
+                        // do some error handling here
+                    }
+                }
+            }
+            TransactionType::Withdrawal => {
+                if let Some(amount) = token.amount {
+                    let client = clients
+                        .entry(token.client_id)
+                        .or_insert_with(|| Client::new(token.client_id));
+                    if client.withdrawal(token.transaction_id, amount).is_err() {
+                        // do some error handling here
+                    }
+                }
+            }
+            TransactionType::Dispute => {
+                let client = clients
+                    .entry(token.client_id)
+                    .or_insert_with(|| Client::new(token.client_id));
+                if client.dispute(token.transaction_id).is_err() {
+                    // do some error handling here
+                }
+            }
+            TransactionType::Resolve => {
+                let client = clients
+                    .entry(token.client_id)
+                    .or_insert_with(|| Client::new(token.client_id));
+                if client.resolve(token.transaction_id).is_err() {
+                    // do some error handling here
+                }
+            }
+            TransactionType::Chargeback => {
+                let client = clients
+                    .entry(token.client_id)
+                    .or_insert_with(|| Client::new(token.client_id));
+                if client.chargeback(token.transaction_id).is_err() {
+                    // do some error handling here
+                }
+            }
+        }
+    }
+    clients
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
         exit(1);
     }
     let tokens_res = read_from_file(&args[1]);
+    if let Ok(tokens) = tokens_res {
+        let mut clients = BTreeMap::<u16, Client>::new();
+        clients = process_requests(tokens, clients);
+    } else {
+        exit(1);
+    }
 }
