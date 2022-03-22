@@ -11,6 +11,8 @@ use rust_decimal::prelude::*;
 mod transaction;
 use transaction::Transaction;
 
+mod client;
+
 #[derive(Debug, Deserialize, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 enum TransactionType {
